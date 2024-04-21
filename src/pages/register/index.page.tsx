@@ -1,9 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Heading, MultiStep, Text, TextInput } from '@ignite-ui/react'
 import { ArrowRight } from '@phosphor-icons/react'
+import { isAxiosError } from 'axios'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+
+import { api } from '@/lib/axios'
 
 import { Container, Form, FormError, Header } from './styles'
 
@@ -35,8 +38,19 @@ export default function RegisterPage() {
     },
   })
 
-  const handleRegister = (data: RegisterFormData) => {
-    console.log(data)
+  async function handleRegister({ username, name }: RegisterFormData) {
+    try {
+      await api.post('/users', { username, name })
+    } catch (error) {
+      if (isAxiosError<{ message?: string }>(error)) {
+        const message = error.response?.data.message
+        if (message) {
+          return alert(message)
+        }
+      }
+
+      console.error(error)
+    }
   }
 
   return (
