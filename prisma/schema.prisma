@@ -13,6 +13,7 @@ model User {
   name      String?
   email     String? @unique
   avatarUrl String? @map("avatar_url")
+  bio       String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

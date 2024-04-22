@@ -8,6 +8,7 @@ import {
   TextInput,
 } from '@ignite-ui/react'
 import { ArrowRight } from '@phosphor-icons/react'
+import { useRouter } from 'next/router'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -61,6 +62,7 @@ type TimeIntervalsFormInput = z.input<typeof timeIntervalsFormSchema>
 type TimeIntervalsFormOutput = z.output<typeof timeIntervalsFormSchema>
 
 export default function TimeIntervalsPage() {
+  const router = useRouter()
   const weekDays = getWeekDays()
   const {
     register,
@@ -90,6 +92,7 @@ export default function TimeIntervalsPage() {
     intervals,
   }: TimeIntervalsFormOutput) {
     await api.post('/users/time-intervals', { intervals })
+    await router.push('/register/update-profile')
   }
 
   return (
