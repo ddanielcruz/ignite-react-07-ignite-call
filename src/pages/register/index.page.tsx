@@ -2,7 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Heading, MultiStep, Text, TextInput } from '@ignite-ui/react'
 import { ArrowRight } from '@phosphor-icons/react'
 import { isAxiosError } from 'axios'
-import { useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -26,21 +27,26 @@ const registerFormSchema = z.object({
 type RegisterFormData = z.infer<typeof registerFormSchema>
 
 export default function RegisterPage() {
-  const searchParams = useSearchParams()
+  const router = useRouter()
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
-    defaultValues: {
-      username: searchParams.get('username') ?? '',
-    },
   })
+
+  useEffect(() => {
+    if (router.query?.username) {
+      setValue('username', String(router.query.username))
+    }
+  }, [router.query?.username, setValue])
 
   async function handleRegister({ username, name }: RegisterFormData) {
     try {
       await api.post('/users', { username, name })
+      await router.push('/register/connect-calendar')
     } catch (error) {
       if (isAxiosError<{ message?: string }>(error)) {
         const message = error.response?.data.message
@@ -89,7 +95,7 @@ export default function RegisterPage() {
         </label>
 
         <Button type="submit" disabled={isSubmitting}>
-          Próximo
+          Próximo passo
           <ArrowRight />
         </Button>
       </Form>

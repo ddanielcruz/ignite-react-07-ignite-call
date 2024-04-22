@@ -24,7 +24,7 @@ export default async function handler(
   }
 
   const user = await prisma.user.create({ data: { name, username } })
-  setCookie({ res: response }, '@ignite-call:userId', user.id, {
+  setCookie({ res: response }, '@ignitecall:userId', user.id, {
     maxAge: 7 * 24 * 60 * 60, // 7 days
     path: '/',
     secure: true,
