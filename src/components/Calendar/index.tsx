@@ -23,11 +23,23 @@ interface CalendarWeek {
 
 interface CalendarProps {
   selectedDate?: Date | null
+  selectedMonth?: Date
+  blockedWeekDays?: number[]
+  blockedDates?: Date[]
   onDateSelected?: (date: Date) => void
+  onMonthSelected?: (date: Date) => void
 }
 
-export function Calendar({ onDateSelected }: CalendarProps) {
-  const [currentDate, setCurrentDate] = useState(() => dayjs().set('date', 1))
+export function Calendar({
+  selectedMonth,
+  blockedWeekDays = [],
+  blockedDates = [],
+  onDateSelected,
+  onMonthSelected,
+}: CalendarProps) {
+  const [currentDate, setCurrentDate] = useState(() =>
+    dayjs(selectedMonth).startOf('month'),
+  )
   const calendarWeeks = useMemo(() => {
     const daysInMonthArray = Array.from(
       { length: currentDate.daysInMonth() },
@@ -51,7 +63,16 @@ export function Calendar({ onDateSelected }: CalendarProps) {
     const calendarDays = [
       ...previousMonthFillArray.map((date) => ({ date, disabled: true })),
       ...daysInMonthArray.map((date) => {
-        return { date, disabled: date.endOf('day').isBefore(today) }
+        const isPastDate = date.endOf('day').isBefore(today)
+        const isBlockedWeekDay = blockedWeekDays.includes(date.get('day'))
+
+        return {
+          date,
+          disabled:
+            isPastDate ||
+            isBlockedWeekDay ||
+            blockedDates.some((blockedDate) => date.isSame(blockedDate, 'day')),
+        }
       }),
       ...nextMonthFillArray.map((date) => ({ date, disabled: true })),
     ]
@@ -68,7 +89,7 @@ export function Calendar({ onDateSelected }: CalendarProps) {
 
       return acc
     }, [])
-  }, [currentDate])
+  }, [currentDate, blockedWeekDays, blockedDates])
 
   const shortWeekDays = getWeekDays({ short: true })
   const currentMonth = currentDate.format('MMMM')
@@ -77,11 +98,13 @@ export function Calendar({ onDateSelected }: CalendarProps) {
   function handlePreviousMonth() {
     const previousMonthDate = currentDate.subtract(1, 'month')
     setCurrentDate(previousMonthDate)
+    onMonthSelected?.(previousMonthDate.toDate())
   }
 
   function handleNextMonth() {
     const nextMonthDate = currentDate.add(1, 'month')
     setCurrentDate(nextMonthDate)
+    onMonthSelected?.(nextMonthDate.toDate())
   }
 
   return (
