@@ -16,7 +16,6 @@ interface SchedulePageProps {
 }
 
 export default function SchedulePage({ user }: SchedulePageProps) {
-  console.log(user.avatarUrl)
   return (
     <Container>
       <UserHeader>
